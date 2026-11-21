@@ -1,0 +1,10 @@
+# Local QA artifacts
+.qa/
+
+# Dependencies (this project has none, kept for safety)
+node_modules/
+
+# Logs and OS junk
+*.log
+.DS_Store
+Thumbs.db
