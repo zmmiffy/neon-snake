@@ -7,7 +7,9 @@
 <p>用原生 JavaScript 与 Canvas 打造的霓虹街机风贪吃蛇。<br />无框架、无依赖、无构建步骤，打开即玩。</p>
 
 <p>
-  <a href="https://zmmiffy.github.io/neon-snake/"><strong>▶ 在线试玩</strong></a>
+  <a href="https://github.com/zmmiffy/neon-snake"><strong>▶ 查看源码</strong></a>
+  &nbsp;·&nbsp;
+  <a href="#本地运行">本地运行</a>
   &nbsp;·&nbsp;
   <a href="https://github.com/zmmiffy/neon-snake/issues">问题反馈</a>
 </p>
@@ -106,18 +108,21 @@ neon-snake/
 │   └── game.js             # Canvas 渲染、输入、状态机
 ├── tests/core.test.mjs     # 18 个核心逻辑测试
 ├── scripts/serve.mjs       # 零依赖本地静态服务器
-├── assets/screenshot.png   # 项目截图
-└── .github/workflows/      # CI 与 GitHub Pages 部署
+└── assets/screenshot.png   # 项目截图
 ```
 
 `js/core.js` 不引用任何浏览器 API，因此同一套规则既跑在页面里，也跑在 Node 测试里。
 
 ## 部署
 
-推送到 `main` 后，GitHub Actions 会运行测试并通过 GitHub Pages 发布静态站点。工作流文件：
+这是一个纯静态站点，没有构建步骤，可直接部署到任意静态托管。
 
-- `.github/workflows/ci.yml` — 语法检查 + 单元测试
-- `.github/workflows/pages.yml` — 构建并发布到 Pages
+仓库已包含预构建的 `gh-pages` 分支。使用 GitHub Pages 时，在 **Settings → Pages** 中选择：
+
+- **Source**: `Deploy from a branch`
+- **Branch**: `gh-pages` / `/ (root)`
+
+保存后即可通过 `https://zmmiffy.github.io/neon-snake/` 访问，无需 GitHub Actions。`main` 分支保存源码，`gh-pages` 分支只包含运行游戏所需的静态文件。
 
 ## License
 
