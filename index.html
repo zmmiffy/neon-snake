@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05060f" />
+  <meta name="description" content="NEON SNAKE —— 一款用原生 JavaScript 与 Canvas 打造的霓虹风贪吃蛇游戏。" />
+  <title>NEON SNAKE · 霓虹贪吃蛇</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="ambient" aria-hidden="true">
+    <span class="orb orb--cyan"></span>
+    <span class="orb orb--magenta"></span>
+    <span class="orb orb--violet"></span>
+    <span class="noise"></span>
+  </div>
+
+  <div class="app">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="NEON SNAKE 首页">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" role="img">
+            <path d="M7 9h12a5 5 0 0 1 0 10H12a4 4 0 0 0 0 8h13" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+            <circle cx="25" cy="27" r="2.6" fill="currentColor" />
+          </svg>
+        </span>
+        <span class="brand-text">NEON<em>SNAKE</em></span>
+      </a>
+
+      <div class="top-actions">
+        <span class="status-pill" id="statusPill"><i></i><span id="statusText">待机</span></span>
+        <button class="icon-btn" id="soundBtn" type="button" aria-label="关闭音效" aria-pressed="false">
+          <svg class="icon icon--sound" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" />
+            <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+          <svg class="icon icon--muted" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" />
+            <path d="m16 9 5 5m0-5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="game-panel" aria-label="游戏区域">
+        <div class="hud">
+          <div class="stat">
+            <span class="stat-label">SCORE</span>
+            <strong class="stat-value" id="score">0</strong>
+          </div>
+          <div class="stat">
+            <span class="stat-label">BEST</span>
+            <strong class="stat-value stat-value--best" id="best">0</strong>
+          </div>
+          <div class="stat stat--mode">
+            <span class="stat-label">MODE</span>
+            <strong class="stat-value stat-value--mode" id="modeLabel">CLASSIC</strong>
+          </div>
+          <div class="hud-actions">
+            <button class="icon-btn icon-btn--hud" id="pauseBtn" type="button" aria-label="暂停游戏" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" /></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="stage" id="stage" tabindex="-1">
+          <canvas id="game" width="720" height="720" role="img" aria-label="贪吃蛇游戏棋盘"></canvas>
+          <div class="stage-chrome" aria-hidden="true">
+            <span class="corner corner--tl"></span>
+            <span class="corner corner--tr"></span>
+            <span class="corner corner--bl"></span>
+            <span class="corner corner--br"></span>
+            <span class="scanlines"></span>
+            <span class="stage-vignette"></span>
+          </div>
+
+          <div class="overlay" id="overlay" data-screen="start">
+            <div class="screen screen--start">
+              <p class="eyebrow">ARCADE <span>//</span> 01</p>
+              <h1 class="hero-title">NEON<span>SNAKE</span></h1>
+              <p class="hero-copy">吞噬霓虹能量，让身体无限延伸。<br />但别撞上墙，也别咬到自己。</p>
+
+              <div class="mode-switch" role="group" aria-label="选择游戏模式">
+                <button class="mode-btn is-active" type="button" data-mode="classic" aria-pressed="true">
+                  <span class="mode-name">CLASSIC</span>
+                  <span class="mode-desc">经典 · 撞墙结束</span>
+                </button>
+                <button class="mode-btn" type="button" data-mode="wrap" aria-pressed="false">
+                  <span class="mode-name">WRAP</span>
+                  <span class="mode-desc">穿墙 · 边界循环</span>
+                </button>
+              </div>
+
+              <button class="primary-btn" id="startBtn" type="button">
+                <span>开始游戏</span>
+                <kbd>Enter</kbd>
+              </button>
+              <p class="overlay-foot"><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> 或 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 移动 · <kbd>Space</kbd> 暂停</p>
+            </div>
+
+            <div class="screen screen--pause">
+              <p class="eyebrow">SYSTEM <span>//</span> HOLD</p>
+              <h2 class="screen-title">PAUSED</h2>
+              <p class="screen-copy">呼吸一下，蛇还在原地等你。</p>
+              <div class="btn-row">
+                <button class="primary-btn" id="resumeBtn" type="button"><span>继续游戏</span><kbd>Space</kbd></button>
+                <button class="ghost-btn" id="pauseMenuBtn" type="button">回到主菜单</button>
+              </div>
+            </div>
+
+            <div class="screen screen--over">
+              <p class="eyebrow" id="overEyebrow">SIGNAL <span>//</span> LOST</p>
+              <h2 class="screen-title" id="overTitle">GAME OVER</h2>
+              <p class="screen-copy" id="overReason">你撞上了边界。</p>
+              <div class="result-grid">
+                <div class="result">
+                  <span>本局得分</span>
+                  <strong id="finalScore">0</strong>
+                </div>
+                <div class="result">
+                  <span>历史最佳</span>
+                  <strong id="finalBest">0</strong>
+                </div>
+              </div>
+              <p class="record-badge" id="recordBadge" hidden>◆ NEW RECORD ◆</p>
+              <div class="btn-row">
+                <button class="primary-btn" id="restartBtn" type="button"><span>再来一局</span><kbd>Enter</kbd></button>
+                <button class="ghost-btn" id="menuBtn" type="button">更换模式</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="touch-controls" aria-label="触屏方向键">
+          <button class="dpad dpad--up" type="button" data-dir="up" aria-label="向上">↑</button>
+          <button class="dpad dpad--left" type="button" data-dir="left" aria-label="向左">←</button>
+          <button class="dpad dpad--down" type="button" data-dir="down" aria-label="向下">↓</button>
+          <button class="dpad dpad--right" type="button" data-dir="right" aria-label="向右">→</button>
+          <span class="dpad-core" aria-hidden="true"></span>
+        </div>
+
+        <p class="mobile-hint">在棋盘上滑动，或使用方向键控制</p>
+      </section>
+
+      <aside class="side-panel">
+        <section class="panel-card panel-card--intro">
+          <p class="panel-kicker">MISSION</p>
+          <h3>吃掉每一颗能量球</h3>
+          <p>每吃一颗得 10 分，身体变长、速度变快。活得越久，霓虹越亮。</p>
+        </section>
+
+        <section class="panel-card">
+          <div class="panel-head">
+            <p class="panel-kicker">RUN DATA</p>
+            <span class="live-dot"><i></i>LIVE</span>
+          </div>
+          <div class="run-stats">
+            <div><span>长度</span><strong id="lengthStat">4</strong></div>
+            <div><span>等级</span><strong id="levelStat">1</strong></div>
+            <div><span>能量</span><strong id="eatenStat">0</strong></div>
+          </div>
+          <div class="speed-meter" aria-hidden="true">
+            <span id="speedFill"></span>
+          </div>
+          <p class="speed-label">SPEED <b id="speedLabel">1.0×</b></p>
+        </section>
+
+        <section class="panel-card">
+          <p class="panel-kicker">CONTROLS</p>
+          <ul class="control-list">
+            <li><span class="keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span><span>移动</span></li>
+            <li><span class="keys"><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd></span><span>移动</span></li>
+            <li><span class="keys"><kbd>Space</kbd></span><span>暂停 / 继续</span></li>
+            <li><span class="keys"><kbd>M</kbd></span><span>静音切换</span></li>
+          </ul>
+        </section>
+
+        <section class="panel-card panel-card--tip">
+          <p class="panel-kicker">TIP</p>
+          <p>提前一格转弯，比贴着尾巴掉头安全得多。在 <b>WRAP</b> 模式里，边界是朋友。</p>
+        </section>
+
+        <a class="repo-link" href="https://github.com/zmmiffy/neon-snake" target="_blank" rel="noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z" fill="currentColor" /></svg>
+          <span>View source on GitHub</span>
+          <span aria-hidden="true">↗</span>
+        </a>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <span>© 2026 NEON SNAKE</span>
+      <span class="footer-mid">BUILT WITH VANILLA JS + CANVAS</span>
+      <span>NO FRAMEWORK · NO LIMITS</span>
+    </footer>
+  </div>
+
+  <div class="sr-only" aria-live="polite" id="liveRegion"></div>
+  <script type="module" src="js/game.js"></script>
+</body>
+</html>
